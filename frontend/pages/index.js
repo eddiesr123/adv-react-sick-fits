@@ -1,9 +1,3 @@
-import Page from '../components/Page';
-
-const IndexPage = () => (
-  <Page>
-    <p>Home</p>
-  </Page>
-);
+const IndexPage = () => <p>Home Page</p>;
 
 export default IndexPage;

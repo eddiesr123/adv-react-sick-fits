@@ -1,3 +1,3 @@
-const ProductPage = () => <div>Hello World!!!</div>;
+const ProductPage = () => <div>ProductPage</div>;
 
 export default ProductPage;

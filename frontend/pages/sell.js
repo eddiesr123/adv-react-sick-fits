@@ -1,3 +1,3 @@
-const SellPage = () => <div>Hello World!!!</div>;
+const SellPage = () => <div>SellPage</div>;
 
 export default SellPage;

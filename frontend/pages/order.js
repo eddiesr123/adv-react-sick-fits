@@ -1,3 +1,3 @@
-const OrderPage = () => <div>Orders</div>;
+const OrderPage = () => <div>Order</div>;
 
 export default OrderPage;

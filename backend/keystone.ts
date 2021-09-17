@@ -1,5 +1,14 @@
+import { createAuth } from '@keystone-next/auth';
 import { config, createSchema } from '@keystone-next/keystone/schema';
+import {
+  statelessSessions,
+  withItemData,
+} from '@keystone-next/keystone/session';
 import 'dotenv/config';
+import { Product } from './schemas/Product';
+import { ProductImage } from './schemas/ProductImage';
+import { User } from './schemas/User';
+import { insertSeedData } from './seed-data';
 
 const databaseURL =
   process.env.DATABASE_URL || 'mongodb://localhost/keystone-sick-fits-tutorial';
@@ -9,24 +18,47 @@ const sessionConfig = {
   secret: process.env.COOKIE_SECRET,
 };
 
-export default config({
-  server: {
-    cors: {
-      origin: [process.env.FRONTEND_URL],
-      credentials: true,
-    },
+const { withAuth } = createAuth({
+  listKey: 'User',
+  identityField: 'email',
+  secretField: 'password',
+  initFirstItem: {
+    fields: ['name', 'email', 'password'],
   },
-  db: {
-    adapter: 'mongoose',
-    url: databaseURL,
-    // TODO: Add data seeding here
-  },
-  lists: createSchema({
-    // Schema items go in here
-  }),
-  ui: {
-    // TODO: Change this for roles
-    isAccessAllowed: () => true,
-  },
-  // TODO: Add session values here
+  // TODO: Add initial roles here
 });
+
+export default withAuth(
+  config({
+    server: {
+      cors: {
+        origin: [process.env.FRONTEND_URL],
+        credentials: true,
+      },
+    },
+    db: {
+      adapter: 'mongoose',
+      url: databaseURL,
+      onConnect: async (keystone) => {
+        if (process.argv.includes('--seed-data')) {
+          await insertSeedData(keystone);
+        }
+      },
+    },
+    lists: createSchema({
+      // Schema items go in here
+      User,
+      Product,
+      ProductImage,
+    }),
+    ui: {
+      // TODO: Change this for roles
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      isAccessAllowed: ({ session }) => Boolean(session?.data),
+    },
+    session: withItemData(statelessSessions(sessionConfig), {
+      // GraphQl Query
+      User: 'id name email',
+    }),
+  })
+);
